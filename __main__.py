@@ -6,6 +6,9 @@ import numpy as np
 t_list = []
 s_list = []
 
+# # global index for solve method
+# index_s = 0
+
 # Making a first and second teachers list and making sure the random choice never repeats, if it doesnt, add it to the list
 # first teachers column
 first_teachers_column = []
@@ -131,6 +134,7 @@ def possible(y,x,n):
             if 1 == middle.day[index] and 1 == right.day[index]:
                 days_matched += 1
         if days_matched > 0:
+            print("days_matched")
             print("works")
             return True
             # matrix[y][x] = n
@@ -170,44 +174,67 @@ def turn_matrix_into_names():
     # using list comprehension, I used map to apply .name to every object in the matrix and make it readable
     matrix_names = [list(map(function, x)) for x in matrix]
     print(list(matrix_names))
+    print("turn matrix into names")
 
+# # finds index of empty element in third row
+# def empty_third_row():
+#     global matrix
+#     for y in range(len(s_list)):
+#         x = 2
+#         if matrix[y][x] is None:
+#             return y
 
-def add_third_row():
+def solve():
+    # using backtracking/recursion
     global matrix
-    global t_list
     global teacher_pool
     global s_list
     global second_teachers_column
-    index = 0
-    while True:
-        teacher1 = random.choice(teacher_pool)
-        print(teacher_pool)
-        # checks if teacher selected is not already in the list and
-        # if length of teachers list is less than length of student list
-        if teacher1 not in second_teachers_column and len(second_teachers_column) < len(s_list)\
-                and possible(index, 2, teacher1) is True:
-            second_teachers_column.append(teacher1)
-            refresh_teacher_pool()
-            index += 1
-            # if length of teachers list is equal to length of student list, then end while loop
-            if len(second_teachers_column) == len(s_list):
-                break
-            else:
-                continue
-        else:
-            continue
-    x = 2
-    y = 0
-    for t in second_teachers_column:
-        matrix[y][x] = t
-        y += 1
+    global t_list
+    # teacher1 = random.choice(teacher_pool)
+    # print(teacher_pool)
+    # parsing through matrix
+    for y in range(len(s_list)):
+        print(y)
+        x = 2
+        if matrix[y][x] is None:
+            for teacher1 in t_list:
+                # checks if teacher selected is not already in the list and
+                # if length of teachers list is less than length of student list
+                if teacher1 not in second_teachers_column and len(second_teachers_column) < len(s_list)\
+                        and possible(y, x, teacher1) is True and teacher1 not in matrix:
+                    print("Inside If Statement")
+                    print(y)
+                    # print(second_teachers_column[y])
+                    # second_teachers_column.append(teacher1)
+                    matrix[y][x] = teacher1
+                    second_teachers_column.append(teacher1)
+                    # refresh_teacher_pool()
+                    print("second teachers column")
+                    print(second_teachers_column)
+                    turn_matrix_into_names()
+                    solve()
+                    print("error recursing")
+                    print(x)
+                    print(y)
+                    turn_matrix_into_names()
+                    matrix[y][x] = None
+                    # second_teachers_column.pop()
+            return
+        print("Exit")
+    # y2 = 0
+    # x2 = 2
+    # for t in second_teachers_column:
+    #     matrix[y2][x2] = t
+    #     y2 += 1
+
 
 def sort():
     global matrix
     add_students()
     add_teachers()
     make_teacher_pool()
-    add_third_row()
+    solve()
     turn_matrix_into_names()
     print(np.matrix(matrix))
 
@@ -260,4 +287,32 @@ sort()
 print("Test")
 print(verify2())
 
-# test
+# def solve():
+#     global matrix
+#     global t_list
+#     global teacher_pool
+#     global s_list
+#     global second_teachers_column
+#     index = 0
+#     while True:
+#         teacher1 = random.choice(teacher_pool)
+#         print(teacher_pool)
+#         # checks if teacher selected is not already in the list and
+#         # if length of teachers list is less than length of student list
+#         if teacher1 not in second_teachers_column and len(second_teachers_column) < len(s_list)\
+#                 and possible(index, 2, teacher1) is True:
+#             second_teachers_column.append(teacher1)
+#             refresh_teacher_pool()
+#             index += 1
+#             # if length of teachers list is equal to length of student list, then end while loop
+#             if len(second_teachers_column) == len(s_list):
+#                 break
+#             else:
+#                 continue
+#         else:
+#             continue
+#     x = 2
+#     y = 0
+#     for t in second_teachers_column:
+#         matrix[y][x] = t
+#         y += 1
