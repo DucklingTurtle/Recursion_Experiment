@@ -18,3 +18,5 @@ class Teacher(object):
         elif self.student1 is None and self.student2 is not None:
             return "----------\n\nName: " + self.name + "\nDays Available: " + self.day + "\nHours Available: " + self.time\
                 + "\nStudent 2: " + self.student2.name
+
+# test

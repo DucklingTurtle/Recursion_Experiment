@@ -11,3 +11,5 @@ class Student:
             return "----------\n\nName: " + self.name
         else:
             print("Remember to code in the rest of the variables printing")
+
+# test
