@@ -2,6 +2,8 @@ import teacher, student, random, pprint
 import numpy
 import numpy as np
 
+error_recursing = False
+
 # list of teacher and student objects
 t_list = []
 s_list = []
@@ -32,12 +34,29 @@ matrix = [
 # generates random students and teachers
 def generate_data():
     # creates 30 teachers
-    for x in range(31):
+    for x in range(20):
         # teacher
         # generates random name, day, and times for teachers
         name_t = random.choice(names_list)
-        day_t = random.choices(binary, weights=[2,3], k=5)
-        time_t = random.choices(binary, weights=[2,3], k=3)
+        while True:
+            counter = 0
+            day_t = random.choices(binary, weights=[2, 3], k=5)
+            for day in day_t:
+                counter += day
+            if counter == 0:
+                day_t = random.choices(binary, weights=[2, 3], k=5)
+            if counter > 0:
+                break
+        while True:
+            counter = 0
+            time_t = random.choices(binary, weights=[2, 3], k=3)
+            for time in time_t:
+                counter += time
+            if counter == 0:
+                time_t = random.choices(binary, weights=[2, 3], k=5)
+                continue
+            if counter > 0:
+                break
         # adds a teacher to the teachers list
         teacher_obj = teacher.Teacher(name_t, day_t, time_t)
         t_list.append(teacher_obj)
@@ -114,6 +133,7 @@ def possible(y,x,n):
     right = None
     # how many days match
     days_matched = 0
+    time_matched = 0
     if matrix[y][x] is None:
         # getting the objects for the row we are checking
         if x == 0:
@@ -133,8 +153,11 @@ def possible(y,x,n):
             # print(right.day)
             if 1 == middle.day[index] and 1 == right.day[index]:
                 days_matched += 1
-        if days_matched > 0:
-            print("days_matched")
+        for index in range(3):
+            if 1 == middle.time[index] and 1 == right.time[index]:
+                time_matched += 1
+        if days_matched > 0 and time_matched > 0:
+            print("days_matched & time")
             print("works")
             return True
             # matrix[y][x] = n
@@ -176,6 +199,16 @@ def turn_matrix_into_names():
     print(list(matrix_names))
     print("turn matrix into names")
 
+
+def find_empty():
+    global matrix
+    global s_list
+    for y in range(len(s_list)):
+        print("Y: " + str(y))
+        x = 2
+        if matrix[y][x] is None:
+            return y, x
+    return False
 # # finds index of empty element in third row
 # def empty_third_row():
 #     global matrix
@@ -184,27 +217,53 @@ def turn_matrix_into_names():
 #         if matrix[y][x] is None:
 #             return y
 
+
 def solve():
+    print("Start of Solve")
+    print("Matrix at Beginning of Solve")
+    turn_matrix_into_names()
     # using backtracking/recursion
     global matrix
-    global teacher_pool
     global s_list
+    global first_teachers_column
     global second_teachers_column
     global t_list
+    global error_recursing
+    # tries = number of times it looped through the teacher pool
+    tries = 0
+    t_pool = t_list
+    # removes teachers from first column from teacher pool
+    for teach in first_teachers_column:
+        if teach in t_pool:
+            index = t_pool.index(teach)
+            t_pool.pop(index)
+    print("lenght of pool")
+    print("lenght if pool: " + str(len(t_pool)))
+    random.shuffle(t_pool)
+    print([x.name for x in t_pool])
+    print("Pool")
+    print(t_pool)
+    # find = cords of empty element
+    find = find_empty()
+    if not find:
+        return True
+    else:
+        y, x = find
     # teacher1 = random.choice(teacher_pool)
     # print(teacher_pool)
     # parsing through matrix
-    for y in range(len(s_list)):
-        print(y)
-        x = 2
+    # for y in range(len(s_list)):
+    #     print("Y: " + str(y))
+    #     x = 2
         if matrix[y][x] is None:
-            for teacher1 in t_list:
+            for teacher1 in t_pool:
+                tries += 1
                 # checks if teacher selected is not already in the list and
                 # if length of teachers list is less than length of student list
-                if teacher1 not in second_teachers_column and len(second_teachers_column) < len(s_list)\
-                        and possible(y, x, teacher1) is True and teacher1 not in matrix:
+                if teacher1 not in matrix and len(second_teachers_column) < len(s_list)\
+                        and possible(y, x, teacher1) is True:
                     print("Inside If Statement")
-                    print(y)
+                    print("Y: " + str(y))
                     # print(second_teachers_column[y])
                     # second_teachers_column.append(teacher1)
                     matrix[y][x] = teacher1
@@ -212,16 +271,28 @@ def solve():
                     # refresh_teacher_pool()
                     print("second teachers column")
                     print(second_teachers_column)
+                    print("Matrix Before Recursion")
                     turn_matrix_into_names()
-                    solve()
-                    print("error recursing")
-                    print(x)
                     print(y)
-                    turn_matrix_into_names()
+                    print(matrix[y][1])
+                    print(matrix[y][x])
+                    if solve():
+                        return True
+                    print("error recursing")
+                    error_recursing = True
+                    print("X: " + str(x))
+                    print("Y: " + str(y))
                     matrix[y][x] = None
-                    # second_teachers_column.pop()
-            return
+                    print(matrix[y+1][1])
+                    print("Matrix after recursion")
+                    turn_matrix_into_names()
+                    second_teachers_column.pop()
+            print("Return; Tries :" + str(tries))
+            print(matrix[y][1])
+            print(teacher1)
+            return False
         print("Exit")
+
     # y2 = 0
     # x2 = 2
     # for t in second_teachers_column:
@@ -286,7 +357,9 @@ generate_data()
 sort()
 print("Test")
 print(verify2())
-
+if error_recursing is True:
+    print("Recursing Found")
+print(len(t_list))
 # def solve():
 #     global matrix
 #     global t_list
@@ -315,4 +388,3 @@ print(verify2())
 #     y = 0
 #     for t in second_teachers_column:
 #         matrix[y][x] = t
-#         y += 1
